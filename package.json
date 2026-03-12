@@ -1,0 +1,13 @@
+{
+    "name": "intellicredit-platform",
+    "version": "1.0.0",
+    "description": "IntelliCredit AI — One-command startup",
+    "scripts": {
+        "start": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" \"npm run server\" \"npm run client\"",
+        "server": "cd backend && node server.js",
+        "client": "npm run dev --prefix intellicredit"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
