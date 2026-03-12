@@ -141,15 +141,15 @@ The platform is designed to look like a high-end corporate analytics terminal. I
 
 <div align="center">
   <h3>1. Command Center & Dashboard</h3>
-  <img src="https://placehold.co/1000x550/101010/00E676?text=Upload+Command+Center+Screenshot+Here" width="800" alt="Command Center" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <img src="./assets/command_center.png" width="800" alt="Command Center" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
   <br><br>
 
   <h3>2. AI Cross-Analysis (GSTR vs Bank)</h3>
-  <img src="https://placehold.co/1000x550/101010/FF1744?text=Upload+Cross+Analysis+Anomaly+Screenshot+Here" width="800" alt="Cross Analysis" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <img src="./assets/cross_analysis.png" width="800" alt="Cross Analysis" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
   <br><br>
 
   <h3>3. Automated CAM Generator</h3>
-  <img src="https://placehold.co/1000x550/101010/2979FF?text=Upload+CAM+Generator+Screenshot+Here" width="800" alt="CAM Generator" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <img src="./assets/cam_generator.png" width="800" alt="CAM Generator" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
 </div>
 
 ---
