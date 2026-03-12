@@ -24,7 +24,66 @@
 
 ---
 
+## 📈 Platform Flowchart
+
+```mermaid
+sequenceDiagram
+    participant U as Credit Manager
+    participant F as Frontend Pipeline
+    participant B as Backend Server
+    participant G as Gemini Vision AI
+    
+    U->>F: Uploads Bank Statement & GSTR
+    F->>B: Sends Documents
+    B->>G: Streams Document + Prompts
+    G-->>B: Classifies Document Type (100% Accuracy)
+    B->>G: Requests Deep Data Extraction
+    G-->>B: Returns Structured KPIs & Financials (JSON)
+    B-->>F: Updates Global AI State
+    F->>U: Displays Document Intelligence Dashboard
+    
+    Note over U,G: Autonomous Secondary Processing
+    B->>G: Run MCA/Litigation Research Check
+    G-->>B: Returns External Risk Sentiments & Legal Flags
+    B-->>F: Cross-Analyzes GSTR vs Actual Bank Inflows
+    F->>U: Flags Discrepancies & Circular Trading Risks
+    
+    F->>U: Generates Final AI Recommendation & CAM
+```
+
+---
+
 ## 🏗️ Architecture
+
+```mermaid
+graph TD
+    subgraph Frontend [IntelliCredit UI - React/Vite]
+        A1[Data Ingestion]
+        A2[Command Center Dashboard]
+        A3[Explainable AI Panels]
+    end
+
+    subgraph Backend [Node.js Express Server]
+        B1[Multer File Uploading]
+        B2[XLSX Ground-Truth Engine]
+        B3[API Routes & Rate Limiting]
+    end
+
+    subgraph AI [Google Gemini Ecosystem]
+        C1[Gemini 2.0 Flash Vision]
+        C2[Gemini 1.5 Pro Fallback Chain]
+    end
+
+    A1 -- "Uploads PDF/Excel" --> B1
+    A2 -- "Fetches Analytics" --> B3
+    B1 -- "Parses Raw Spreadsheets" --> B2
+    B2 -- "Sends Ground Truth + Prompts" --> C1
+    B3 -- "Handles Overloads" --> C2
+    C1 -- "Returns JSON Payload" --> B2
+    B2 -- "Serves State" --> A2
+```
+
+---
 
 - **Frontend (`/intellicredit`):** React + Vite. Features modular components (Data Ingestion, Due Diligence, Recommendation Engine, Explainable AI) with Framer Motion animations and a stunning UI.
 - **Backend (`/backend`):** Node.js + Express. Exposes endpoints for file uploading (Multer), dynamic spreadsheet mathematical parsing (XLSX), and direct integration with the `@google/generative-ai` SDK.
@@ -74,9 +133,24 @@
 
 ---
 
-## 📺 Demonstration & UI
+## 📺 Demonstration & UI Gallery
 
-The platform is designed to look like a high-end corporate analytics terminal. Connect the frontend to the backend and try uploading the sample financial spreadsheets/PDFs to witness real-time extraction and decisioning scenarios (e.g., catching revenue inflation variance and rejecting bad applications with 96% AI confidence).
+The platform is designed to look like a high-end corporate analytics terminal. It utilizes a striking dark-mode aesthetic with neon success/warning indicators, keeping the underwriter entirely focused on data anomalies.
+
+> *Note: Add your actual screenshots to an `assets` folder and update these image paths before the demo!*
+
+<div align="center">
+  <h3>1. Command Center & Dashboard</h3>
+  <img src="https://placehold.co/1000x550/101010/00E676?text=Upload+Command+Center+Screenshot+Here" width="800" alt="Command Center" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <br><br>
+
+  <h3>2. AI Cross-Analysis (GSTR vs Bank)</h3>
+  <img src="https://placehold.co/1000x550/101010/FF1744?text=Upload+Cross+Analysis+Anomaly+Screenshot+Here" width="800" alt="Cross Analysis" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <br><br>
+
+  <h3>3. Automated CAM Generator</h3>
+  <img src="https://placehold.co/1000x550/101010/2979FF?text=Upload+CAM+Generator+Screenshot+Here" width="800" alt="CAM Generator" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+</div>
 
 ---
 
