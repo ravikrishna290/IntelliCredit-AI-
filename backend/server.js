@@ -4,6 +4,8 @@ const cors = require('cors');
 const multer = require('multer');
 const XLSX = require('xlsx');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
+const pdf = require('pdf-parse');
 
 const app = express();
 
@@ -12,48 +14,90 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// Model fallback chain — automatically moves to next model on 429 or 404
+// Model fallback chain
 const MODEL_CHAIN = [
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite',
-  'gemini-1.5-flash-latest',
-  'gemini-1.5-flash-8b',
-  'gemini-1.0-pro',
+  'gemini-1.5-flash',
+  'groq:llama-3.3-70b-versatile',
+  'groq:mixtral-8x7b-32768'
 ];
 let activeModelIndex = 0;
 let model = genAI.getGenerativeModel({ model: MODEL_CHAIN[0] });
 
-console.log(`🤖 Active model: ${MODEL_CHAIN[activeModelIndex]}`);
+console.log(`🤖 Active engine: ${MODEL_CHAIN[activeModelIndex]}`);
 
 function switchToNextModel() {
   if (activeModelIndex < MODEL_CHAIN.length - 1) {
     activeModelIndex++;
-    model = genAI.getGenerativeModel({ model: MODEL_CHAIN[activeModelIndex] });
-    console.warn(`⚠️  Switched to fallback model: ${MODEL_CHAIN[activeModelIndex]}`);
+    const nextModel = MODEL_CHAIN[activeModelIndex];
+    if (!nextModel.startsWith('groq:')) {
+      model = genAI.getGenerativeModel({ model: nextModel });
+    }
+    console.warn(`⚠️  Fallback engaged: ${nextModel}`);
     return true;
   }
-  return false; // all models exhausted
+  return false;
+}
+
+/**
+ * Groq-specific generation. Strips/Extracts text from multi-part Gemini-style requests.
+ */
+async function generateGroq(genArgs) {
+  const modelName = MODEL_CHAIN[activeModelIndex].replace('groq:', '');
+  let prompt = '';
+  
+  if (typeof genArgs === 'string') {
+    prompt = genArgs;
+  } else if (genArgs.contents) {
+    // Extract text from Gemini parts
+    const parts = genArgs.contents[0].parts;
+    for (const p of parts) {
+      if (p.text) prompt += p.text + '\n';
+      // If there's inlineData, we treat it as an unreadable binary for Groq unless we parsed it earlier
+      if (p.inlineData) prompt += `[File Content provided to AI Engine]\n`;
+    }
+  }
+
+  console.log(`⚡ Groq Call [${modelName}]`);
+  const response = await groq.chat.completions.create({
+    messages: [{ role: 'user', content: prompt }],
+    model: modelName,
+    response_format: genArgs.generationConfig?.responseMimeType === 'application/json' ? { type: 'json_object' } : undefined,
+  });
+
+  const text = response.choices[0].message.content;
+  return {
+    response: {
+      text: () => text
+    }
+  };
 }
 
 // Smart wrapper: handles 429 (rate limit) by switching model, and retries
-async function generateWithRetry(requestFn, maxRetries = 4) {
+async function generateWithRetry(genArgs, maxRetries = 5) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await requestFn();
+      const currentModel = MODEL_CHAIN[activeModelIndex];
+      if (currentModel.startsWith('groq:')) {
+        return await generateGroq(genArgs);
+      }
+      return await model.generateContent(genArgs);
     } catch (err) {
       const is429 = err.message?.includes('429');
       const is404 = err.message?.includes('404') || err.message?.includes('not found');
-      if ((is429 || is404) && attempt < maxRetries) {
-        const switched = switchToNextModel();
-        if (switched) {
-          console.warn(`[${is429 ? '429' : '404'}] Retrying with: ${MODEL_CHAIN[activeModelIndex]}`);
-          continue; // retry immediately with new model
+      const is503 = err.message?.includes('503');
+      const isQuota = err.message?.includes('quota') || err.message?.includes('limit');
+      
+      if ((is429 || is404 || is503 || isQuota) && attempt < maxRetries) {
+        if (switchToNextModel()) {
+          console.warn(`[${attempt}] Fallback to ${MODEL_CHAIN[activeModelIndex]} due to ${err.message?.slice(0, 50)}`);
+          continue;
         }
-        // All models exhausted — wait and retry same model
-        const delayMatch = err.message?.match(/(\d+\.?\d*)s/);
-        const waitSecs = delayMatch ? Math.min(parseFloat(delayMatch[1]) + 2, 60) : 30;
-        console.warn(`[429] All models tried. Waiting ${waitSecs}s...`);
+        const waitSecs = attempt * 10;
+        console.warn(`[FAIL] No fallbacks left. Waiting ${waitSecs}s...`);
         await new Promise(r => setTimeout(r, waitSecs * 1000));
       } else {
         throw err;
@@ -198,7 +242,7 @@ Return ONLY this JSON:
   "briefReason": "One sentence about key identifying features found"
 }`;
 
-    const result = await model.generateContent({
+    const result = await generateWithRetry({
       contents: [{ role: 'user', parts: [...fileParts, { text: prompt }] }],
       generationConfig: { responseMimeType: 'application/json' }
     });
@@ -361,7 +405,7 @@ JSON structure to return:
   }
 }`;
 
-    const result = await model.generateContent({
+    const result = await generateWithRetry({
       contents: [{ role: 'user', parts: [...fileParts, { text: prompt }] }],
       generationConfig: { responseMimeType: 'application/json' }
     });
@@ -396,7 +440,7 @@ Return ONLY this JSON:
   "riskImpact": number from -10 to +10,
   "interpretation": "One sentence explanation"
 }`;
-    const result = await model.generateContent(prompt);
+    const result = await generateWithRetry(prompt);
     const cleanJson = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
     res.json(JSON.parse(cleanJson));
   } catch (error) {
@@ -474,7 +518,7 @@ Return ONLY this JSON:
   ]
 }`;
 
-    const result = await model.generateContent({
+    const result = await generateWithRetry({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: { responseMimeType: 'application/json' }
     });
