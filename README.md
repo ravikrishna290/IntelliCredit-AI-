@@ -140,16 +140,19 @@ The platform is designed to look like a high-end corporate analytics terminal. I
 > *Note: Add your actual screenshots to an `assets` folder and update these image paths before the demo!*
 
 <div align="center">
-  <h3>1. Command Center & Dashboard</h3>
-  <img src="./assets/command_center.png" width="800" alt="Command Center" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <h3>1. Data Ingestion & AI Pipeline</h3>
+  <p>Real-time autonomous extraction of financial KPIs from raw documents.</p>
+  <img src="./docs/screenshots/intellicredit_analysis_complete_1773404411871.png" width="800" alt="Data Ingestion" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
   <br><br>
 
-  <h3>2. AI Cross-Analysis (GSTR vs Bank)</h3>
-  <img src="./assets/cross_analysis.png" width="800" alt="Cross Analysis" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <h3>2. AI Risk Scoring Engine</h3>
+  <p>Comprehensive 5C's analysis with transparent evidence markers and AI interpretation.</p>
+  <img src="./docs/screenshots/risk_scoring_complete_1773393420267.png" width="800" alt="Risk Scoring" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
   <br><br>
 
-  <h3>3. Automated CAM Generator</h3>
-  <img src="./assets/cam_generator.png" width="800" alt="CAM Generator" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+  <h3>3. Platform Architecture</h3>
+  <p>High-resilience dual-engine infrastructure for enterprise-grade uptime.</p>
+  <img src="./docs/screenshots/pipeline_completed_1773393387963.png" width="800" alt="Platform Pipeline" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
 </div>
 
 ---
